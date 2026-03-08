@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sargam — The companion that actually listens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Psychologically calming palette — soft sage, warm cream, gentle coral */
+      --bg:         #f8f6f2;
+      --surface:    #ffffff;
+      --border:     #ece8e1;
+      --text:       #1c1a17;
+      --muted:      #7a756c;
+      --sage:       #4e7f5f;       /* trust, calm, growth */
+      --sage-lt:    #ecf4ee;
+      --sage-mid:   #d1e7d8;
+      --coral:      #c96b52;       /* warmth, human, approachable */
+      --coral-lt:   #fdf0ec;
+      --amber:      #d4961a;
+      --r:          12px;
+      --r-lg:       20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+      letter-spacing: -0.012em;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px;
+      background: rgba(248,246,242,0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.15rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); animation: blink 2.5s ease infinite; }
+    .nav-btn {
+      background: var(--text); color: #fff;
+      padding: 7px 16px; border-radius: 100px;
+      font-size: 0.78rem; font-weight: 500;
+      text-decoration: none; letter-spacing: -0.01em;
+      transition: opacity .15s;
+    }
+    .nav-btn:hover { opacity: .78; }
+
+    /* ─── HERO ─── */
+    .hero {
+      padding: 56px 18px 48px;
+      max-width: 620px; margin: 0 auto;
+      text-align: center;
+    }
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--sage-lt); color: var(--sage);
+      padding: 4px 12px; border-radius: 100px;
+      font-size: 0.73rem; font-weight: 500;
+      margin-bottom: 24px;
+      animation: up .5s ease both;
+    }
+    .pill-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); animation: blink 2s ease infinite; }
+
+    .hero h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(2.3rem, 9vw, 3.8rem);
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin-bottom: 16px;
+      animation: up .5s ease .08s both;
+    }
+    .hero h1 em { font-style: italic; color: var(--sage); }
+
+    .hero-sub {
+      font-size: 0.97rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 400px; margin: 0 auto 30px;
+      animation: up .5s ease .16s both;
+    }
+
+    .hero-actions {
+      display: flex; flex-direction: column; gap: 10px; align-items: center;
+      animation: up .5s ease .24s both;
+    }
+    .btn-main {
+      background: var(--sage); color: #fff;
+      padding: 13px 28px; border-radius: 100px;
+      font-size: 0.9rem; font-weight: 500;
+      text-decoration: none; width: 100%; max-width: 260px;
+      text-align: center; letter-spacing: -0.01em;
+      transition: all .15s; box-shadow: 0 2px 12px rgba(78,127,95,.22);
+    }
+    .btn-main:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-link { font-size: 0.8rem; color: var(--muted); text-decoration: none; }
+
+    .hero-hint {
+      margin-top: 14px; font-size: 0.72rem; color: var(--muted);
+      animation: up .5s ease .32s both;
+    }
+
+    /* ─── STAT BAR ─── */
+    .stat-bar {
+      display: flex; justify-content: center;
+      gap: 0; flex-wrap: nowrap;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      animation: up .5s ease .38s both;
+    }
+    .stat {
+      flex: 1; padding: 18px 10px; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.55rem; line-height: 1; color: var(--text); display: block;
+    }
+    .stat-lbl { font-size: 0.68rem; color: var(--muted); margin-top: 3px; line-height: 1.35; }
+
+    /* ─── SECTION COMMON ─── */
+    .sec {
+      padding: 60px 18px;
+      max-width: 640px; margin: 0 auto;
+    }
+    .sec-tag {
+      font-size: 0.7rem; font-weight: 500;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 10px;
+    }
+    .sec h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(1.7rem, 5vw, 2.3rem);
+      line-height: 1.14; letter-spacing: -0.022em;
+      margin-bottom: 12px;
+    }
+    .sec h2 em { font-style: italic; color: var(--sage); }
+    .sec-body { font-size: 0.93rem; color: var(--muted); line-height: 1.65; }
+
+    .divider { border: none; border-top: 1px solid var(--border); }
+
+    /* ─── CHAT DEMO ─── */
+    .chat-card {
+      margin-top: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: 0 6px 32px rgba(0,0,0,.07);
+    }
+    .chat-head {
+      padding: 12px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .chat-ava {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--sage), #3a6148);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Instrument Serif', serif;
+      font-size: 0.85rem; color: #fff; flex-shrink: 0;
+    }
+    .chat-meta-name { font-size: 0.84rem; font-weight: 500; }
+    .chat-meta-status {
+      font-size: 0.68rem; color: var(--sage);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); }
+    .chat-msgs {
+      padding: 16px 14px;
+      display: flex; flex-direction: column; gap: 8px;
+      background: #f4f2ee;
+      min-height: 320px;
+    }
+    .msg { max-width: 80%; opacity: 0; transform: translateY(5px); transition: opacity .32s ease, transform .32s ease; }
+    .msg.in { opacity: 1; transform: none; }
+    .msg.user { align-self: flex-end; }
+    .msg.ai   { align-self: flex-start; }
+    .bubble {
+      padding: 9px 13px;
+      font-size: 0.85rem; line-height: 1.5;
+      border-radius: 14px;
+    }
+    .msg.user .bubble {
+      background: var(--sage); color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+    .msg.ai .bubble {
+      background: #fff; color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+    }
+    .msg-t { font-size: 0.62rem; color: var(--muted); margin-top: 3px; padding: 0 3px; }
+    .msg.user .msg-t { text-align: right; }
+    .typer {
+      align-self: flex-start;
+      background: #fff; border: 1px solid var(--border);
+      padding: 10px 14px; border-radius: 14px; border-bottom-left-radius: 3px;
+      display: flex; gap: 4px; align-items: center;
+      opacity: 0; transition: opacity .2s;
+    }
+    .typer.in { opacity: 1; }
+    .typer span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #bbb; animation: bounce 1.1s ease infinite;
+    }
+    .typer span:nth-child(2) { animation-delay: .16s; }
+    .typer span:nth-child(3) { animation-delay: .32s; }
+
+    /* ─── TOPIC GRID ─── */
+    .topic-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin-top: 28px;
+    }
+    .topic-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .topic-card:hover { border-color: var(--sage-mid); box-shadow: 0 2px 10px rgba(78,127,95,.08); }
+    .topic-icon { font-size: 1.2rem; display: block; margin-bottom: 7px; }
+    .topic-card h3 { font-size: 0.84rem; font-weight: 500; margin-bottom: 3px; }
+    .topic-card p { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+
+    /* ─── HOW IT WORKS ─── */
+    .steps { margin-top: 32px; display: flex; flex-direction: column; }
+    .step { display: flex; gap: 14px; padding-bottom: 24px; position: relative; }
+    .step:not(:last-child)::before {
+      content: ''; position: absolute;
+      left: 14px; top: 30px; bottom: 0;
+      width: 1px; background: var(--border);
+    }
+    .step-num {
+      width: 29px; height: 29px; border-radius: 50%;
+      background: var(--sage-lt); color: var(--sage);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.73rem; font-weight: 600;
+      flex-shrink: 0; position: relative; z-index: 1;
+    }
+    .step-body h3 { font-size: 0.9rem; font-weight: 500; margin-bottom: 3px; padding-top: 4px; }
+    .step-body p { font-size: 0.8rem; color: var(--muted); line-height: 1.55; }
+
+    /* ─── WHY DIFFERENT ─── */
+    .diff-list { margin-top: 28px; display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .diff-row {
+      display: grid; grid-template-columns: 1fr 80px 80px;
+      padding: 12px 16px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem; gap: 8px; align-items: center;
+    }
+    .diff-row:last-child { border-bottom: none; }
+    .diff-row.head {
+      background: #fafaf8; font-size: 0.68rem; font-weight: 500;
+      letter-spacing: .04em; text-transform: uppercase; color: var(--muted);
+    }
+    .diff-row.head .col-s { color: var(--sage); }
+    .col { text-align: center; }
+    .col.left { text-align: left; color: var(--text); }
+    .x { color: #ccc; font-size: 1rem; }
+    .ck { color: var(--sage); font-size: 1rem; }
+
+    /* ─── FOUNDER ─── */
+    .founder-wrap {
+      margin-top: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 26px 22px;
+      position: relative; overflow: hidden;
+    }
+    .founder-wrap::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--sage), var(--coral));
+    }
+    .founder-q {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.05rem; font-style: italic;
+      line-height: 1.6; color: var(--text);
+      margin-bottom: 18px;
+    }
+    .founder-name { font-size: 0.82rem; font-weight: 500; }
+    .founder-role { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── WAITLIST ─── */
+    .wl-sec {
+      background: var(--text);
+      padding: 60px 18px;
+    }
+    .wl-inner { max-width: 440px; margin: 0 auto; text-align: center; }
+    .wl-inner h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(1.7rem, 6vw, 2.4rem);
+      line-height: 1.12; letter-spacing: -0.022em;
+      color: #fff; margin-bottom: 10px;
+    }
+    .wl-inner h2 em { font-style: italic; color: #8fbc99; }
+    .wl-inner p { font-size: 0.85rem; color: rgba(255,255,255,.48); margin-bottom: 26px; line-height: 1.6; }
+    .wl-form { display: flex; flex-direction: column; gap: 9px; }
+    .wl-form input {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      color: #fff; padding: 12px 18px;
+      border-radius: 100px; font-size: 0.88rem;
+      font-family: 'Inter', sans-serif;
+      outline: none; transition: border-color .15s;
+      letter-spacing: -0.01em;
+    }
+    .wl-form input::placeholder { color: rgba(255,255,255,.3); }
+    .wl-form input:focus { border-color: rgba(255,255,255,.3); }
+    .wl-form button {
+      background: #8fbc99; color: var(--text);
+      padding: 13px; border-radius: 100px;
+      border: none; font-size: 0.88rem; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+      transition: opacity .15s; letter-spacing: -0.01em;
+    }
+    .wl-form button:hover { opacity: .86; }
+    .wl-note { margin-top: 12px; font-size: 0.68rem; color: rgba(255,255,255,.3); }
+    .wl-success {
+      display: none;
+      background: rgba(143,188,153,.12);
+      border: 1px solid rgba(143,188,153,.25);
+      color: #8fbc99; padding: 14px;
+      border-radius: var(--r); font-size: 0.85rem;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 24px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
+      border-top: 1px solid var(--border);
+      max-width: 640px; margin: 0 auto;
+    }
+    .footer-brand { font-family: 'Instrument Serif', serif; font-size: 0.95rem; }
+    .footer-note { font-size: 0.7rem; color: var(--muted); }
+
+    /* ─── REVEAL ─── */
+    .rv { opacity: 0; transform: translateY(16px); transition: opacity .48s ease, transform .48s ease; }
+    .rv.on { opacity: 1; transform: none; }
+
+    /* ─── KEYFRAMES ─── */
+    @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:.35} }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
+    @keyframes up     { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+
+    /* ─── TABLET+ ─── */
+    @media(min-width:600px) {
+      .hero { padding: 72px 24px 60px; }
+      .hero-actions { flex-direction: row; justify-content: center; }
+      .btn-main { width: auto; }
+      .sec { padding: 72px 24px; }
+      .topic-grid { grid-template-columns: repeat(3,1fr); }
+      footer { max-width: 680px; padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-dot"></div>
+    Sargam
+  </a>
+  <a href="#waitlist" class="nav-btn">Join Waitlist</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-pill"><div class="pill-dot"></div> Early access · Free to start</div>
+  <h1>The companion that<br/><em>actually listens</em></h1>
+  <p class="hero-sub">
+    Talk about work stress, relationships, family, money, or just a rough day.
+    Sargam is always there — 24/7, on WhatsApp.
+  </p>
+  <div class="hero-actions">
+    <a href="#waitlist" class="btn-main">Get early access</a>
+    <a href="#demo" class="btn-link">See it in action ↓</a>
+  </div>
+  <p class="hero-hint">No app to download &nbsp;·&nbsp; Works on WhatsApp &nbsp;·&nbsp; Always free to start</p>
+</section>
+
+<!-- STAT BAR -->
+<div class="stat-bar">
+  <div class="stat">
+    <span class="stat-num">57%</span>
+    <div class="stat-lbl">of adults feel they have<br/>no one to truly talk to</div>
+  </div>
+  <div class="stat">
+    <span class="stat-num">2 am</span>
+    <div class="stat-lbl">when most people<br/>need support most</div>
+  </div>
+  <div class="stat">
+    <span class="stat-num">0</span>
+    <div class="stat-lbl">helplines that<br/>picked up that night</div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- CHAT DEMO -->
+<section class="sec" id="demo">
+  <p class="sec-tag rv">Live conversation</p>
+  <h2 class="rv">What it feels like<br/>to <em>talk to Sargam</em></h2>
+  <p class="sec-body rv">Sunday night. Can't sleep. Work tomorrow is already heavy.</p>
+
+  <div class="chat-card rv">
+    <div class="chat-head">
+      <div class="chat-ava">S</div>
+      <div>
+        <div class="chat-meta-name">Sargam</div>
+        <div class="chat-meta-status">
+          <div class="status-dot"></div>
+          Always here
+        </div>
+      </div>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="typer" id="typerEl">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TOPICS -->
+<section class="sec">
+  <p class="sec-tag rv">Everything</p>
+  <h2 class="rv">No topic too small.<br/><em>No topic too heavy.</em></h2>
+  <p class="sec-body rv">Built for the full range of adult life — not just crises.</p>
+
+  <div class="topic-grid">
+    <div class="topic-card rv">
+      <span class="topic-icon">💼</span>
+      <h3>Work & Burnout</h3>
+      <p>Toxic managers, Sunday dread, imposter syndrome, being passed over</p>
+    </div>
+    <div class="topic-card rv">
+      <span class="topic-icon">💔</span>
+      <h3>Relationships</h3>
+      <p>Ghosting, breakups, one-sided love, family pressure to settle down</p>
+    </div>
+    <div class="topic-card rv">
+      <span class="topic-icon">👨‍👩‍👧</span>
+      <h3>Family</h3>
+      <p>Expectations, comparisons, never feeling like enough</p>
+    </div>
+    <div class="topic-card rv">
+      <span class="topic-icon">💸</span>
+      <h3>Money & Shame</h3>
+      <p>Debt, job loss, financial stress nobody else knows about</p>
+    </div>
+    <div class="topic-card rv">
+      <span class="topic-icon">🪞</span>
+      <h3>Identity</h3>
+      <p>Feeling lost, invisible, like everyone has life figured out but you</p>
+    </div>
+    <div class="topic-card rv">
+      <span class="topic-icon">🌙</span>
+      <h3>Just a rough day</h3>
+      <p>When nothing big happened, but everything still feels heavy</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- HOW IT WORKS -->
+<section class="sec">
+  <p class="sec-tag rv">How it works</p>
+  <h2 class="rv">As simple as texting<br/><em>a close friend</em></h2>
+
+  <div class="steps">
+    <div class="step rv">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Open WhatsApp</h3>
+        <p>No app, no account. Send a message to Sargam's number and you're in.</p>
+      </div>
+    </div>
+    <div class="step rv">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Say anything</h3>
+        <p>In English, Hindi, or whatever mix feels natural. Sargam follows your lead.</p>
+      </div>
+    </div>
+    <div class="step rv">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Sargam listens first</h3>
+        <p>No exercises, no advice until you're ready. It validates how you feel before anything else.</p>
+      </div>
+    </div>
+    <div class="step rv">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>It remembers you</h3>
+        <p>Come back days later — Sargam picks up where you left off. No re-explaining.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- WHY DIFFERENT -->
+<section class="sec">
+  <p class="sec-tag rv">Why Sargam</p>
+  <h2 class="rv">Built different,<br/><em>by design</em></h2>
+
+  <div class="diff-list rv">
+    <div class="diff-row head">
+      <div class="col left">Feature</div>
+      <div class="col">Others</div>
+      <div class="col col-s">Sargam</div>
+    </div>
+    <div class="diff-row">
+      <div class="col left">Remembers you across sessions</div>
+      <div class="col"><span class="x">✕</span></div>
+      <div class="col"><span class="ck">✓</span></div>
+    </div>
+    <div class="diff-row">
+      <div class="col left">Works on WhatsApp (no new app)</div>
+      <div class="col"><span class="x">✕</span></div>
+      <div class="col"><span class="ck">✓</span></div>
+    </div>
+    <div class="diff-row">
+      <div class="col left">Available at 2am, always</div>
+      <div class="col"><span class="x">✕</span></div>
+      <div class="col"><span class="ck">✓</span></div>
+    </div>
+    <div class="diff-row">
+      <div class="col left">Understands cultural context</div>
+      <div class="col"><span class="x">✕</span></div>
+      <div class="col"><span class="ck">✓</span></div>
+    </div>
+    <div class="diff-row">
+      <div class="col left">Free to start, always</div>
+      <div class="col"><span class="x">✕</span></div>
+      <div class="col"><span class="ck">✓</span></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- FOUNDER -->
+<section class="sec">
+  <p class="sec-tag rv">Our story</p>
+  <h2 class="rv">Built from<br/><em>real experience</em></h2>
+
+  <div class="founder-wrap rv">
+    <p class="founder-q">
+      "I called every helpline I could find at 2am. None of them picked up.
+      I built Sargam because that silence should never happen to anyone again."
+    </p>
+    <div class="founder-name">Jagadeeswar</div>
+    <div class="founder-role">Founder, Sargam</div>
+  </div>
+
+  <p class="sec-body rv" style="margin-top:20px">
+    Sargam isn't built by researchers who read about the problem in a paper.
+    It's built by someone who lived it — and couldn't find anything that actually helped.
+    That origin is the product's most important feature.
+  </p>
+</section>
+
+<hr class="divider"/>
+
+<!-- WAITLIST -->
+<section class="wl-sec" id="waitlist">
+  <div class="wl-inner">
+    <h2>Be the first to<br/><em>talk to Sargam</em></h2>
+    <p>We're opening access to a small group first. Leave your details and we'll reach out on WhatsApp personally.</p>
+
+    <div class="wl-form" id="wlForm">
+      <input type="text"  id="wlName"  placeholder="Your first name" autocomplete="off"/>
+      <input type="tel"   id="wlPhone" placeholder="WhatsApp number (e.g. +91 98765 43210)" autocomplete="off"/>
+      <button onclick="submitWL()">Join the waitlist →</button>
+    </div>
+
+    <div class="wl-success" id="wlSuccess">
+      ✓ You're on the list. We'll message you on WhatsApp personally.
+    </div>
+
+    <p class="wl-note">No spam. No app. We'll reach out directly.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Sargam</div>
+  <div class="footer-note">कोई सुन रहा है &nbsp;·&nbsp; Someone is listening</div>
+</footer>
+
+<script>
+// ── Scroll reveal
+const rvEls = document.querySelectorAll('.rv');
+const rvObs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) setTimeout(() => e.target.classList.add('on'), i * 55);
+  });
+}, { threshold: 0.08 });
+rvEls.forEach(el => rvObs.observe(el));
+
+// ── Chat animation data
+const conversation = [
+  { r: 'user', t: "can't sleep. tomorrow is going to be rough", ts: '11:41 PM' },
+  { r: 'ai',   t: "What's making tomorrow feel that way?", ts: '11:41 PM' },
+  { r: 'user', t: "big presentation. but honestly it's my manager. last week he said my work 'lacks direction' — in front of the whole team", ts: '11:42 PM' },
+  { r: 'ai',   t: "That's a harsh thing to say in front of everyone.", ts: '11:42 PM' },
+  { r: 'ai',   t: "That must have really stung.", ts: '11:42 PM' },
+  { r: 'user', t: "yeah. i worked so hard on that. felt invisible after. like why am i even trying", ts: '11:43 PM' },
+  { r: 'ai',   t: "Working hard and still feeling unseen — that exhaustion is hard to explain to people.", ts: '11:43 PM' },
+  { r: 'ai',   t: "Is this the first time he's done something like this, or has it been a pattern?", ts: '11:43 PM' },
+  { r: 'user', t: "it's been months honestly. i just keep telling myself it'll get better", ts: '11:44 PM' },
+  { r: 'ai',   t: "You've been carrying this for a long time.", ts: '11:44 PM' },
+  { r: 'ai',   t: "And tonight — the night before you have to face him again — it all came back at once.", ts: '11:44 PM' },
+];
+
+let chatStarted = false;
+const demoEl = document.getElementById('demo');
+const demoObs = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting && !chatStarted) {
+    chatStarted = true;
+    playChat();
+  }
+}, { threshold: 0.3 });
+demoObs.observe(demoEl);
+
+async function playChat() {
+  const box   = document.getElementById('chatMsgs');
+  const typer = document.getElementById('typerEl');
+  const wait  = ms => new Promise(r => setTimeout(r, ms));
+
+  for (const m of conversation) {
+    if (m.r === 'ai') {
+      box.appendChild(typer);
+      typer.classList.add('in');
+      await wait(Math.min(m.t.length * 18 + 480, 1800));
+      typer.classList.remove('in');
+      await wait(120);
+    }
+
+    const d = document.createElement('div');
+    d.className = `msg ${m.r}`;
+    d.innerHTML = `<div class="bubble">${m.t}</div><div class="msg-t">${m.ts}</div>`;
+    box.insertBefore(d, typer);
+    await wait(20);
+    d.classList.add('in');
+    box.scrollTop = box.scrollHeight;
+
+    await wait(m.r === 'user' ? 950 : 380);
+  }
+}
+
+// ── Waitlist
+function submitWL() {
+  const name  = document.getElementById('wlName').value.trim();
+  const phone = document.getElementById('wlPhone').value.trim();
+  if (!name || !phone) { alert('Please fill in both fields.'); return; }
+  document.getElementById('wlForm').style.display    = 'none';
+  document.getElementById('wlSuccess').style.display = 'block';
+}
+</script>
+</body>
+</html>
