@@ -247,6 +247,7 @@
     .wl-form button:hover { opacity: .86; }
     .wl-note { margin-top: 12px; font-size: 0.68rem; color: rgba(255,255,255,.3); }
     .wl-success { display: none; background: rgba(143,188,153,.12); border: 1px solid rgba(143,188,153,.25); color: #8fbc99; padding: 14px; border-radius: var(--r); font-size: 0.85rem; }
+    .wl-error   { display: none; background: rgba(201,107,82,.12); border: 1px solid rgba(201,107,82,.25); color: #e08a76; padding: 14px; border-radius: var(--r); font-size: 0.85rem; }
 
     /* FOOTER */
     footer { padding: 24px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--border); max-width: 640px; margin: 0 auto; }
@@ -507,19 +508,20 @@
     <h2>Start your journey<br/><em>with a companion</em></h2>
     <p>We are opening access to a small group first. Leave your details and we will reach out on WhatsApp personally.</p>
     <div class="wl-form" id="wlForm">
-      <input type="text" id="wlName"  placeholder="Your first name" autocomplete="off"/>
-      <input type="tel"  id="wlPhone" placeholder="WhatsApp number (e.g. +91 98765 43210)" autocomplete="off"/>
-      <button onclick="submitWL()">Join the waitlist</button>
+      <input type="text"  id="wlName"  placeholder="Your first name" autocomplete="off"/>
+      <input type="email" id="wlEmail" placeholder="Your email address" autocomplete="off"/>
+      <button id="wlBtn" onclick="submitWL()">Join the waitlist</button>
     </div>
-    <div class="wl-success" id="wlSuccess">You are on the list. We will message you on WhatsApp personally.</div>
-    <p class="wl-note">No spam. No app. We will reach out directly.</p>
+    <div class="wl-success" id="wlSuccess">You are on the list. We will reach out soon.</div>
+    <div class="wl-error" id="wlError">Something went wrong. Please try again.</div>
+    <p class="wl-note">No spam. No noise. Just Sargam.</p>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
   <div class="footer-brand">Sargam</div>
-  <div class="footer-note">You don't have to go through this alone</div>
+  <div class="footer-note">कोई सुन रहा है &nbsp;·&nbsp; Someone is listening</div>
 </footer>
 
 <script>
@@ -576,13 +578,37 @@ async function playChat() {
   }
 }
 
-// Waitlist
-function submitWL() {
+// Waitlist — POSTs to /api/waitlist (Vercel serverless function)
+async function submitWL() {
   const name  = document.getElementById('wlName').value.trim();
-  const phone = document.getElementById('wlPhone').value.trim();
-  if (!name || !phone) { alert('Please fill in both fields.'); return; }
-  document.getElementById('wlForm').style.display    = 'none';
-  document.getElementById('wlSuccess').style.display = 'block';
+  const email = document.getElementById('wlEmail').value.trim();
+  const btn   = document.getElementById('wlBtn');
+
+  if (!name || !email) { alert('Please fill in both fields.'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email.'); return; }
+
+  btn.textContent = 'Joining...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email })
+    });
+
+    if (res.ok) {
+      document.getElementById('wlForm').style.display    = 'none';
+      document.getElementById('wlSuccess').style.display = 'block';
+    } else {
+      throw new Error('Failed');
+    }
+  } catch (e) {
+    btn.textContent = 'Join the waitlist';
+    btn.disabled = false;
+    document.getElementById('wlError').style.display = 'block';
+    setTimeout(() => document.getElementById('wlError').style.display = 'none', 4000);
+  }
 }
 </script>
 </body>
